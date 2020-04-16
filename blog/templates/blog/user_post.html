@@ -1,0 +1,104 @@
+{% extends 'blog/base.html' %}
+{% block content %}
+<!-- Modal -->
+<div class="modal fade" id="exampleModal2" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Datos del usuario al que quieres donar</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+
+                      <div class="media-body">
+                        <p><span class="titles"><strong>Usuario: </strong></span><span id="usuario"></span></p>
+                        <p><span class="titles"><strong>Producto: </strong></span><span id="nombreP"></span></p>
+                        <p><span class="titles"><strong>Email: </strong></span><span id="email"></span></p>
+                        <p><span class="titles"><strong>Dirección: </strong></span><span id="direccion"><span></p>
+                        <p><span class="titles"><strong>Teléfono: </strong></span><span id="telefono"></span></p>
+                      </div>
+
+                    <p style="font-size:12px"><i>Puedes comunicarte con el solicitante usando estos datos o
+                    podemos contactarlo por ti si clickeas Contactar.
+                    (Le enviaremos un mail con tus datos y los de la donación)</i></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-sm mt-1 mb-1" data-dismiss="modal">Cerrar</button>
+        <button type="button" class="btn btn-primary btn-sm mt-1 mb-1" onclick="sendMail(); return false">Contactar</button>
+      </div>
+    </div>
+  </div>
+</div>
+    <h3 class="mb-3">Productos Solicitados por {{ view.kwargs.username }} ({{ page_obj.paginator.count}})
+        <a class="btn btn-outline-secondary btn-sm mt-1 mb-1" href="{% url 'blog-filter' %}">Volver</a>
+    </h3>
+    {% for post in posts %}
+    <div class="home">
+        <article class="media content-section">
+          <img class="rounded-circle article-img" src="{{ post.author.profile.image.url }}">
+
+          <div class="media-body">
+            <div class="article-metadata">
+              <h3><strong>{{ post.producto }}{% if post.cantidad > 1 %}s{% endif %} - {{ post.author }}</strong></h3>
+              {% if post.author != user %}
+              <!-- Button trigger modal -->
+              <button id="botonModal" type="button" class="btn btn-outline-info btn-sm mt-1 mb-1" data-toggle="modal" data-target="#exampleModal2"
+              nombreProducto="{{ post.producto }}" telefono="{{ post.author.profile.telefono }}" usuario="{{ post.author }}"
+              email="{{ post.author.email }}" direccion="{{ post.author.profile.direccion }}">Donar</button>
+              {% endif %}
+              {% if post.author == user %}
+                  <a class="btn btn-outline-secondary btn-sm mt-1 mb-1" href="{% url 'post-update' post.id %}">Editar</a>
+                  <a class="btn btn-outline-danger btn-sm mt-1 mb-1" href="{% url 'post-delete' post.id %}">Borrar</a>
+              {% endif %}
+            </div>
+            <p><span class="titles"><strong>Producto deseado:</strong></span> {{ post.producto }}</p>
+            <p><span class="titles"><strong>Cantidad:</strong></span> {{ post.cantidad }}</p>
+            <p><span class="titles"><strong>Categoria:</strong></span> {{ post.categoria }}</p>
+            <p><span class="titles"><strong>Uso:</strong></span> {{ post.contenido }}</p>
+            <p><span class="titles"><strong>Fecha de publicacion:</strong></span> <small class="text-muted">{{ post.date_posted }}</small></p>
+          </div>
+        </article>
+      </div>
+    {% endfor %}
+    {% if is_paginated %}
+
+      {% if page_obj.has_previous %}
+        <a class="btn btn-outline-info mb-4"href="?page=1">First</a>
+        <a class="btn btn-outline-info mb-4"href="?page={{ page_obj.has_previous_page_number }}">Previous</a>
+      {% endif %}
+
+      {% for num in page_obj.paginator.page_range %}
+        {% if page_obj.number == num %}
+          <a class="btn btn-info mb-4"href="?page={{ num }}">{{ num }}</a>
+        {% elif num > page_obj.number|add:'-3' and num <= page_obj.number|add:'3' %}
+          <a class="btn btn-outline-info mb-4"href="?page={{ num }}">{{ num }}</a>
+        {% endif  %}
+      {% endfor %}
+
+      {% if page_obj.has_next %}
+        <a class="btn btn-outline-info mb-4"href="?page={{ page_obj.next_page_number }}">Next</a>
+        <a class="btn btn-outline-info mb-4"href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+      {% endif %}
+
+    {% endif %}
+    <script type="text/javascript">
+      $(document).ready(function(){
+
+        $(document).on("click", "#botonModal", function () {
+           var usuario = $(this).attr('usuario');
+           $("#usuario").text( usuario );
+           var nombrep = $(this).attr('nombreProducto');
+           $("#nombreP").text( nombrep );
+           var email = $(this).attr('email');
+           $("#email").text( email );
+           var telefono = $(this).attr('telefono');
+           $("#telefono").text( telefono );
+           var direccion = $(this).attr('direccion');
+           $("#direccion").text( direccion );
+      });
+
+    });
+    </script>
+{% endblock content %}
